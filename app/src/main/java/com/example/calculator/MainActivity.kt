@@ -52,13 +52,13 @@ class MainActivity : ComponentActivity() {
                             CalculatorMenu(navController)
                         }
                         composable<Basic> {
-                            BasicCalculatorUI()
+                            BasicCalculatorUI(navController)
                         }
                         composable<Advanced> {
-                            AdvancedCalculatorUI()
+                            AdvancedCalculatorUI(navController)
                         }
                         composable<About> {
-                            AboutPageUI()
+                            AboutPageUI(navController)
                         }
                     }
                 }
@@ -66,8 +66,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
 @Composable
 fun CalculatorMenu(
     navController: NavController,
@@ -118,19 +116,23 @@ fun MenuButton(text: String = "", onClick: () -> Unit = {}){
 }
 
 @Composable
-fun BasicCalculatorUI() {
-    MenuButton("skebob"){
-
+fun BasicCalculatorUI(navController : NavController) {
+    MenuButton("Back"){
+        navController.popBackStack()
     }
 }
 
 @Composable
-fun AdvancedCalculatorUI() {
-
+fun AdvancedCalculatorUI(navController : NavController) {
+    MenuButton("Back"){
+        navController.popBackStack()
+    }
 }
 @Composable
-fun AboutPageUI() {
-
+fun AboutPageUI(navController : NavController) {
+    MenuButton("Back"){
+        navController.popBackStack()
+    }
 }
 
 @Composable
