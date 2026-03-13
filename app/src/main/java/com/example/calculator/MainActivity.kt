@@ -16,43 +16,64 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import kotlinx.serialization.Serializable
+@Serializable
+object Menu
+@Serializable
+object Basic
+@Serializable
+object Advanced
+@Serializable
+object About
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val navController = rememberNavController()
+
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 content = { padding ->
-                    CalculatorMenu(
-                        modifier = Modifier.padding(padding),
-
-                        { println("Basic clicked") },
-                        { println("Basic clicked") },
-                        { println("Basic clicked") },
-                        { println("Basic clicked") }
-                    )
+                    NavHost(
+                        navController = navController,
+                        startDestination = Menu,
+                        modifier = Modifier.padding(padding)
+                    ) {
+                        composable<Menu> {
+                            CalculatorMenu(navController)
+                        }
+                        composable<Basic> {
+                            BasicCalculatorUI()
+                        }
+                        composable<Advanced> {
+                            AdvancedCalculatorUI()
+                        }
+                        composable<About> {
+                            AboutPageUI()
+                        }
+                    }
                 }
             )
         }
     }
 }
 
+
 @Composable
 fun CalculatorMenu(
-    modifier: Modifier = Modifier,
-    
-    onBasicClick: () -> Unit,
-    onAdvancedClick: () -> Unit,
-    onAboutClick: () -> Unit,
-    onExitClick: () -> Unit
+    navController: NavController,
 ) {
     Column(
-        modifier = modifier
+        Modifier
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
@@ -64,15 +85,24 @@ fun CalculatorMenu(
             modifier = Modifier.padding(bottom = 40.dp)
         )
 
-        MenuButton("Basic", onBasicClick)
-        MenuButton("Advanced", onAdvancedClick)
-        MenuButton("About", onAboutClick)
-        MenuButton("Exit", onExitClick)
+        MenuButton("Basic"){
+            navController.navigate(Basic)
+        }
+        MenuButton("Advanced"){
+            navController.navigate(Advanced)
+        }
+        MenuButton("About"){
+            navController.navigate(About)
+        }
+        MenuButton("Exit"){
+            navController.popBackStack()
+        }
     }
 }
 
+
 @Composable
-fun MenuButton(text: String, onClick: () -> Unit){
+fun MenuButton(text: String = "", onClick: () -> Unit = {}){
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -88,7 +118,18 @@ fun MenuButton(text: String, onClick: () -> Unit){
 }
 
 @Composable
-fun CalculatorUI() {
+fun BasicCalculatorUI() {
+    MenuButton("skebob"){
+
+    }
+}
+
+@Composable
+fun AdvancedCalculatorUI() {
+
+}
+@Composable
+fun AboutPageUI() {
 
 }
 
