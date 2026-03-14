@@ -1,7 +1,5 @@
 package com.example.calculator
 
-import android.R.attr.value
-import android.graphics.fonts.FontStyle
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,19 +15,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -131,7 +133,7 @@ fun MenuButton(text: String = "", onClick: () -> Unit = {}){
 @Composable
 fun CalculatorButton(label: String, onClick: (String) -> Unit = {}) {
     OutlinedButton(
-        onClick = { onClick },
+        onClick = { onClick(label) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp)
@@ -151,14 +153,25 @@ fun BasicCalculatorUI(navController : NavController) {
     Column(
         modifier = Modifier.fillMaxSize()
     ){
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Calculator input",
-                    fontSize = 36.sp
-                )
-            }
+        var input by remember { mutableStateOf("") }
+
+        Spacer(modifier = Modifier.weight(0.5f))
+
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = input,
+            onValueChange = { input = it },
+            textStyle = TextStyle(fontSize = 48.sp, textAlign = TextAlign.End),
+            colors = androidx.compose.material3.TextFieldDefaults.colors(
+                focusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+                unfocusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+                disabledContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+                focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent
+            )
         )
+
         val buttons = listOf(
             "C","()","%","D",
             "7","8","9","/",
@@ -169,13 +182,14 @@ fun BasicCalculatorUI(navController : NavController) {
         Spacer(modifier = Modifier.weight(1f))
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(4)
-
+            columns = GridCells.Fixed(4),
         ) {
             items(buttons) { button ->
                 CalculatorButton(
                     label = button,
-                    onClick = { }
+                    onClick = {
+                        input += button
+                    }
                 )
             }
         }
