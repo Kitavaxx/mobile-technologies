@@ -135,12 +135,12 @@ fun CalculatorButton(label: String, onClick: (String) -> Unit = {}) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp)
-            .height(70.dp)
+            .height(65.dp)
             .size(30.dp)
     ){
         Text(
             text=  label,
-            fontSize = 40.sp
+            fontSize = 28.sp
         )
     }
 }
@@ -160,13 +160,13 @@ fun BasicCalculatorUI(navController : NavController) {
             }
         )
         val buttons = listOf(
+            "C","()","%","D",
             "7","8","9","/",
             "4","5","6","*",
             "1","2","3","-",
             "0",".","=","+"
         )
-        Spacer(modifier = Modifier.size(350.dp))
-
+        Spacer(modifier = Modifier.weight(1f))
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(4)
@@ -186,14 +186,50 @@ fun BasicCalculatorUI(navController : NavController) {
             navController.popBackStack()
         }
     }
-
-
 }
+@OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
 fun AdvancedCalculatorUI(navController : NavController) {
-    MenuButton("Back"){
-        navController.popBackStack()
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ){
+        TopAppBar(
+            title = {
+                Text(
+                    text = "Calculator input",
+                    fontSize = 36.sp
+                )
+            }
+        )
+        val buttons = listOf(
+            "sin","cos","tan","ln",
+            "sqrt","x^2","x^y","log",
+            "C","()","%","D",
+            "7","8","9","/",
+            "4","5","6","*",
+            "1","2","3","-",
+            "0",".","=","+"
+        )
+        Spacer(modifier = Modifier.weight(1f))
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4)
+
+        ) {
+            items(buttons) { button ->
+                CalculatorButton(
+                    label = button,
+                    onClick = { }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.size(10.dp))
+
+        MenuButton("Back"){
+            navController.popBackStack()
+        }
     }
 }
 @Composable
