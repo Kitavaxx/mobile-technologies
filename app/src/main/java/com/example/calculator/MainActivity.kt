@@ -1,5 +1,6 @@
 package com.example.calculator
 
+import android.R.attr.value
 import android.graphics.fonts.FontStyle
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,9 +14,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -110,21 +118,76 @@ fun MenuButton(text: String = "", onClick: () -> Unit = {}){
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
-            .height(60.dp)
+            .padding(4.dp)
+            .height(70.dp)
     ){
         Text(
             text = text,
-            fontSize = 20.sp
+            fontSize = 30.sp
         )
     }
 }
 
 @Composable
-fun BasicCalculatorUI(navController : NavController) {
-    MenuButton("Back"){
-        navController.popBackStack()
+fun CalculatorButton(label: String, onClick: (String) -> Unit = {}) {
+    OutlinedButton(
+        onClick = { onClick },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+            .height(70.dp)
+            .size(30.dp)
+    ){
+        Text(
+            text=  label,
+            fontSize = 40.sp
+        )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BasicCalculatorUI(navController : NavController) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ){
+        TopAppBar(
+            title = {
+                Text(
+                    text = "Calculator input",
+                    fontSize = 36.sp
+                )
+            }
+        )
+        val buttons = listOf(
+            "7","8","9","/",
+            "4","5","6","*",
+            "1","2","3","-",
+            "0",".","=","+"
+        )
+        Spacer(modifier = Modifier.size(350.dp))
+
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4)
+
+        ) {
+            items(buttons) { button ->
+                CalculatorButton(
+                    label = button,
+                    onClick = { }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.size(10.dp))
+
+        MenuButton("Back"){
+            navController.popBackStack()
+        }
+    }
+
+
 }
 
 @Composable
@@ -164,7 +227,3 @@ fun AboutPageUI(navController : NavController) {
     }
 }
 
-@Composable
-fun CalculatorButton(label: String, onClick: (String) -> Unit) {
-
-}
