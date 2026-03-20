@@ -154,6 +154,7 @@ fun BasicCalculatorUI(navController : NavController) {
         modifier = Modifier.fillMaxSize()
     ){
         var input by remember { mutableStateOf("") }
+        var operations by remember { mutableStateOf("+-/%*") }
 
         Spacer(modifier = Modifier.weight(0.5f))
 
@@ -188,7 +189,27 @@ fun BasicCalculatorUI(navController : NavController) {
                 CalculatorButton(
                     label = button,
                     onClick = {
-                        input += button
+                        when(button){
+                            "D" -> input = input.dropLast(1);
+                            "C" -> input = "";
+                            "." ->
+                                if('.' !in input){
+                                input += button
+                            };
+                            in listOf("/" , "+", "*", "-", "%") ->{
+                                val lastChar = input.lastOrNull()
+
+                                if(lastChar != null && lastChar in operations){
+                                    input = input.dropLast(1) + button
+                                }else if(lastChar == null){
+                                    Unit;
+                                }else{
+                                    input += button
+                                }
+                            }
+                            "=" -> Unit // tokenizing string logic with operations first in ranking to calc final result
+                            else -> input += button
+                        }
                     }
                 )
             }
