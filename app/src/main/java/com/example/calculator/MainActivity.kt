@@ -1,6 +1,7 @@
 package com.example.calculator
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -52,6 +53,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             val navController = rememberNavController()
 
@@ -174,13 +176,16 @@ fun BasicCalculatorUI(navController : NavController) {
         )
 
         val buttons = listOf(
-            "C","()","%","D",
-            "7","8","9","/",
-            "4","5","6","*",
-            "1","2","3","-",
-            "0",".","=","+"
+            "C","()","%","/",
+            "7","8","9","*",
+            "4","5","6","-",
+            "1","2","3","+",
+            "+/-","0",".","="
         )
         Spacer(modifier = Modifier.weight(1f))
+
+        var tokenized: List<String> = emptyList()
+        var token = ""
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(4),
@@ -192,10 +197,12 @@ fun BasicCalculatorUI(navController : NavController) {
                         when(button){
                             "D" -> input = input.dropLast(1);
                             "C" -> input = "";
-                            "." ->
-                                if('.' !in input){
-                                input += button
-                            };
+                            "." ->{
+                                tokenized = tokenizeInput(input)
+                                token = tokenized.last()
+                                if('.' !in token) input += button;
+                            }
+
                             in listOf("/" , "+", "*", "-", "%") ->{
                                 val lastChar = input.lastOrNull()
 
@@ -207,7 +214,9 @@ fun BasicCalculatorUI(navController : NavController) {
                                     input += button
                                 }
                             }
-                            "=" -> Unit // tokenizing string logic with operations first in ranking to calc final result
+                            "=" -> input = evaluate(tokenizeInput(input)).toString()
+                            "+/-" -> Unit
+                            "()" -> Unit
                             else -> input += button
                         }
                     }
@@ -221,6 +230,68 @@ fun BasicCalculatorUI(navController : NavController) {
             navController.popBackStack()
         }
     }
+}
+
+fun tokenizeInput(expr: String): List<String> {
+    val tokens = mutableListOf<String>();
+    var numberBuffer = ""
+
+    for(char in expr){
+        if(char.isDigit() || char == '.'){
+            numberBuffer += char
+        }else if(char in "+-*/%"){
+            if(numberBuffer.isNotEmpty()){
+                tokens.add(numberBuffer);
+                numberBuffer = ""
+            }
+            tokens.add(char.toString())
+        }
+    }
+
+    if(numberBuffer.isNotEmpty()) tokens.add(numberBuffer)
+
+    return tokens;
+}
+
+fun evaluate(tokens: List<String>): Double {
+/*    val stack = mutableListOf<Double>()
+    val ops = mutableListOf<String>()
+
+    fun applyOp() {
+        val b = stack.removeLast()
+        val a = stack.removeLast()
+        val op = ops.removeLast()
+        val result = when(op) {
+            "+" -> a + b
+            "-" -> a - b
+            "*" -> a * b
+            "/" -> a / b
+            "%" -> a % b
+            else -> 0.0
+        }
+        stack.add(result)
+    }
+
+    val precedence = mapOf(
+        "+" to 1, "-" to 1,
+        "*" to 2, "/" to 2, "%" to 2
+    )
+
+    for (token in tokens) {
+        if (token.toDoubleOrNull() != null) {
+            stack.add(token.toDouble())
+        } else if (token in precedence) {
+            while (ops.isNotEmpty() && precedence[ops.last()]!! >= precedence[token]!!) {
+                applyOp()
+            }
+            ops.add(token)
+        }
+    }
+
+    while (ops.isNotEmpty()) applyOp()
+
+    return stack.first()*/
+    return 0.0
 }
 @OptIn(ExperimentalMaterial3Api::class)
 
