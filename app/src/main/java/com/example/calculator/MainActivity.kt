@@ -1,7 +1,7 @@
 package com.example.calculator
 
+import android.app.Activity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -69,13 +72,13 @@ class MainActivity : ComponentActivity() {
                             CalculatorMenu(navController)
                         }
                         composable<Basic> {
-                            BasicCalculatorUI(navController)
+                            BasicCalculator(navController)
                         }
                         composable<Advanced> {
-                            AdvancedCalculatorUI(navController)
+                            AdvancedCalculator(navController)
                         }
                         composable<About> {
-                            AboutPageUI(navController)
+                            AboutPage(navController)
                         }
                     }
                 }
@@ -84,9 +87,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 @Composable
-fun CalculatorMenu(
-    navController: NavController,
-) {
+fun CalculatorMenu(navController: NavController) {
+    val activity = LocalContext.current as? Activity
+
     Column(
         Modifier
             .fillMaxSize()
@@ -110,124 +113,7 @@ fun CalculatorMenu(
             navController.navigate(About)
         }
         MenuButton("Exit"){
-            navController.popBackStack()
-        }
-    }
-}
-
-
-@Composable
-fun MenuButton(text: String = "", onClick: () -> Unit = {}){
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp)
-            .height(70.dp)
-    ){
-        Text(
-            text = text,
-            fontSize = 30.sp
-        )
-    }
-}
-
-@Composable
-fun CalculatorButton(label: String, onClick: (String) -> Unit = {}) {
-    OutlinedButton(
-        onClick = { onClick(label) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp)
-            .height(65.dp)
-            .size(30.dp)
-    ){
-        Text(
-            text=  label,
-            fontSize = 28.sp
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BasicCalculatorUI(navController : NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ){
-        var input by remember { mutableStateOf("") }
-        var operations by remember { mutableStateOf("+-/%*") }
-
-        Spacer(modifier = Modifier.weight(0.5f))
-
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = input,
-            onValueChange = { input = it },
-            textStyle = TextStyle(fontSize = 48.sp, textAlign = TextAlign.End),
-            colors = androidx.compose.material3.TextFieldDefaults.colors(
-                focusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
-                unfocusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
-                disabledContainerColor = androidx.compose.ui.graphics.Color.Transparent,
-                focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent
-            )
-        )
-
-        val buttons = listOf(
-            "C","()","%","/",
-            "7","8","9","*",
-            "4","5","6","-",
-            "1","2","3","+",
-            "+/-","0",".","="
-        )
-        Spacer(modifier = Modifier.weight(1f))
-
-        var tokenized: List<String> = emptyList()
-        var token = ""
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-        ) {
-            items(buttons) { button ->
-                CalculatorButton(
-                    label = button,
-                    onClick = {
-                        when(button){
-                            "D" -> input = input.dropLast(1);
-                            "C" -> input = "";
-                            "." ->{
-                                tokenized = tokenizeInput(input)
-                                token = tokenized.last()
-                                if('.' !in token) input += button;
-                            }
-
-                            in listOf("/" , "+", "*", "-", "%") ->{
-                                val lastChar = input.lastOrNull()
-
-                                if(lastChar != null && lastChar in operations){
-                                    input = input.dropLast(1) + button
-                                }else if(lastChar == null){
-                                    Unit;
-                                }else{
-                                    input += button
-                                }
-                            }
-                            "=" -> input = evaluate(tokenizeInput(input)).toString()
-                            "+/-" -> Unit
-                            "()" -> Unit
-                            else -> input += button
-                        }
-                    }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.size(10.dp))
-
-        MenuButton("Back"){
-            navController.popBackStack()
+            activity?.finishAffinity()
         }
     }
 }
@@ -293,10 +179,95 @@ fun evaluate(tokens: List<String>): Double {
     return stack.first()*/
     return 0.0
 }
-@OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun AdvancedCalculatorUI(navController : NavController) {
+fun BasicCalculator(navController : NavController) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ){
+        var input by remember { mutableStateOf("") }
+        var operations by remember { mutableStateOf("+-/%*") }
+
+        Spacer(modifier = Modifier.weight(0.5f))
+
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = input,
+            onValueChange = { input = it },
+            textStyle = TextStyle(fontSize = 48.sp, textAlign = TextAlign.End),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            )
+        )
+
+        val buttons = listOf(
+            "C","%","/","|",
+            "7","8","9","*",
+            "4","5","6","-",
+            "1","2","3","+",
+            "+/-","0",".","="
+        )
+        Spacer(modifier = Modifier.weight(1f))
+
+        var tokenized: List<String> = emptyList()
+        var token = ""
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+        ) {
+            items(buttons) { button ->
+                CalculatorButton(
+                    label = button,
+                    onClick = {
+                        when(button){
+                            "D" -> input = input.dropLast(1);
+                            "C" -> input = "";
+                            "." ->{
+                                tokenized = tokenizeInput(input)
+                                token = tokenized.last()
+                                if('.' !in token) input += button;
+                            }
+
+                            in listOf("/" , "+", "*", "-", "%") ->{
+                                val lastChar = input.lastOrNull()
+
+                                if(lastChar != null && lastChar in operations){
+                                    input = input.dropLast(1) + button
+                                }else if(lastChar == null){
+                                    Unit;
+                                }else{
+                                    input += button
+                                }
+                            }
+                            "=" -> input = evaluate(tokenizeInput(input)).toString()
+                            "+/-" -> {
+                                tokenized = tokenizeInput(input)
+                                token = tokenized.last()
+//                                    if(token.isDigitsOnly())
+//                                        if(token - 1 == '-'){
+//                                            token - 1 = '+'
+//                                        }else if(token - 1 == '+'){
+//                                            token - 1 = -
+//                                        }
+                            }
+                            "()" -> Unit
+                            else -> input += button
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdvancedCalculator(navController : NavController) {
     Column(
         modifier = Modifier.fillMaxSize()
     ){
@@ -324,22 +295,16 @@ fun AdvancedCalculatorUI(navController : NavController) {
 
         ) {
             items(buttons) { button ->
-                CalculatorButton(
+                AdvancedCalculatorButton(
                     label = button,
                     onClick = { }
                 )
             }
         }
-
-        Spacer(modifier = Modifier.size(10.dp))
-
-        MenuButton("Back"){
-            navController.popBackStack()
-        }
     }
 }
 @Composable
-fun AboutPageUI(navController : NavController) {
+fun AboutPage(navController : NavController) {
     Column(
         Modifier
             .fillMaxSize()
@@ -362,10 +327,56 @@ fun AboutPageUI(navController : NavController) {
                     "more complex math needs.",
             fontSize = 20.sp,
         )
-        Spacer(modifier = Modifier.size(60.dp))
-        MenuButton("Back"){
-            navController.popBackStack()
-        }
+    }
+}
+
+@Composable
+fun CalculatorButton(label: String, onClick: (String) -> Unit = {}) {
+    OutlinedButton(
+        onClick = { onClick(label) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+            .height(100.dp)
+            .size(70.dp)
+    ){
+        Text(
+            text=  label,
+            fontSize = 28.sp
+        )
+    }
+}
+
+@Composable
+fun AdvancedCalculatorButton(label: String, onClick: (String) -> Unit = {}) {
+    OutlinedButton(
+        onClick = { onClick(label) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+            .height(70.dp)
+            .size(70.dp)
+    ){
+        Text(
+            text=  label,
+            fontSize = 28.sp
+        )
+    }
+}
+
+@Composable
+fun MenuButton(text: String = "", onClick: () -> Unit = {}){
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .height(70.dp)
+    ){
+        Text(
+            text = text,
+            fontSize = 30.sp
+        )
     }
 }
 
