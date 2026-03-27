@@ -2,6 +2,7 @@ package com.example.calculator
 
 import android.app.Activity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,7 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -208,7 +208,7 @@ fun BasicCalculator(navController : NavController) {
         )
 
         val buttons = listOf(
-            "AC","%","Del","/",
+            "AC","C","%","/",
             "7","8","9","*",
             "4","5","6","-",
             "1","2","3","+",
@@ -216,8 +216,11 @@ fun BasicCalculator(navController : NavController) {
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        var tokens: List<String> = emptyList()
-        val operations = "+-/%"
+        val currentContext = LocalContext.current
+        val toastDuration = Toast.LENGTH_SHORT
+        val errorText = "Invalid operation"
+        val operations = "+-/%.*"
+        val operatorsList = listOf("/", "+", "*", "-", "%")
         var token = ""
 
         LazyVerticalGrid(
@@ -228,24 +231,28 @@ fun BasicCalculator(navController : NavController) {
                     label = button,
                     onClick = {
                         when(button){
-                            "Del" -> viewModel.deleteLast();
+                            "C" -> viewModel.deleteLast();
                             "AC" -> viewModel.clear();
-                            "." ->{
-                                tokens = tokenizeInput(input.value)
-                                token = tokens.last()
-                                if('.' !in token && !token.isEmpty() && token.lastOrNull() != '.') viewModel.append(button)
-                                else Unit // some error handler like toaster
-                            }
-
-                            in listOf("/" , "+", "*", "-", "%") ->{
+                            in operatorsList + "." ->{
                                 val lastChar = input.value.lastOrNull()
+                                val tokens = tokenizeInput(input.value)
+                                val lastToken = tokens.lastOrNull().orEmpty()
+                                var dotSet = 0
 
-                                if(lastChar != null && lastChar in operations){
-                                    viewModel.onInputChange(input.value.dropLast(1) + button)
-                                }else if(lastChar == null){
-                                    Unit;
-                                }else{
-                                    viewModel.append(button)
+                                if (button == ".") {
+                                    if ('.' !in lastToken && !lastToken.isEmpty()) {
+                                        viewModel.append(button)
+                                        dotSet = 1
+                                    } else {
+                                        Toast.makeText(currentContext, errorText, toastDuration).show()
+                                    }
+
+                                }
+
+                                if (lastChar != null && lastChar in operations) {
+                                    if(dotSet == 1) viewModel.onInputChange(input.value.dropLast(1) + button)
+                                } else if (lastChar != null) {
+                                    if(dotSet == 0) viewModel.append(button)
                                 }
                             }
                             "=" -> {
@@ -262,7 +269,6 @@ fun BasicCalculator(navController : NavController) {
                                     }else if(sign == "+"){
                                         tokenized[tokenized.size - 2] = "-"
                                     }
-
                                     viewModel.onInputChange(tokenized.joinToString(""))
                                 }
                             }
