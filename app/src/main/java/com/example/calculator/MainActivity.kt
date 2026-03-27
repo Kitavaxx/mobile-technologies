@@ -26,10 +26,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +33,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -147,7 +142,7 @@ fun tokenizeInput(expr: String): List<String> {
 }
 
 fun evaluate(tokens: List<String>): Double {
-/*    val stack = mutableListOf<Double>()
+    val stack = mutableListOf<Double>()
     val ops = mutableListOf<String>()
 
     fun applyOp() {
@@ -183,8 +178,7 @@ fun evaluate(tokens: List<String>): Double {
 
     while (ops.isNotEmpty()) applyOp()
 
-    return stack.first()*/
-    return 0.0
+    return stack.first()
 }
 
 @Composable
@@ -214,7 +208,7 @@ fun BasicCalculator(navController : NavController) {
         )
 
         val buttons = listOf(
-            "C","%","/","|||",
+            "AC","%","Del","/",
             "7","8","9","*",
             "4","5","6","-",
             "1","2","3","+",
@@ -222,7 +216,8 @@ fun BasicCalculator(navController : NavController) {
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        var tokenized: List<String> = emptyList()
+        var tokens: List<String> = emptyList()
+        val operations = "+-/%"
         var token = ""
 
         LazyVerticalGrid(
@@ -233,17 +228,17 @@ fun BasicCalculator(navController : NavController) {
                     label = button,
                     onClick = {
                         when(button){
-                            "D" -> viewModel.deleteLast();
-                            "C" -> viewModel.clear();
+                            "Del" -> viewModel.deleteLast();
+                            "AC" -> viewModel.clear();
                             "." ->{
-                                tokenized = tokenizeInput(input.value)
-                                token = tokenized.last()
-                                if('.' !in token) viewModel.append(button);
+                                tokens = tokenizeInput(input.value)
+                                token = tokens.last()
+                                if('.' !in token && !token.isEmpty() && token.lastOrNull() != '.') viewModel.append(button)
+                                else Unit // some error handler like toaster
                             }
 
                             in listOf("/" , "+", "*", "-", "%") ->{
                                 val lastChar = input.value.lastOrNull()
-                                val operations = "+-/%"
 
                                 if(lastChar != null && lastChar in operations){
                                     viewModel.onInputChange(input.value.dropLast(1) + button)
@@ -254,20 +249,23 @@ fun BasicCalculator(navController : NavController) {
                                 }
                             }
                             "=" -> {
-                                val res = evaluate(tokenizeInput(input.value)).toString()
-                                viewModel.setResult(res)
+                                val evalResult = evaluate(tokenizeInput(input.value)).toString()
+                                viewModel.setResult(evalResult)
                             }
                             "+/-" -> {
-                                tokenized = tokenizeInput(input.value)
+                                val tokenized = tokenizeInput(input.value).toMutableList()
                                 token = tokenized.last()
-//                                    if(token.isDigitsOnly())
-//                                        if(token - 1 == '-'){
-//                                            token - 1 = '+'
-//                                        }else if(token - 1 == '+'){
-//                                            token - 1 = -
-//                                        }
+                                if(token !in operations){
+                                    val sign = tokenized.getOrNull(tokenized.size - 2)
+                                    if(sign == "-"){
+                                        tokenized[tokenized.size - 2] = "+"
+                                    }else if(sign == "+"){
+                                        tokenized[tokenized.size - 2] = "-"
+                                    }
+
+                                    viewModel.onInputChange(tokenized.joinToString(""))
+                                }
                             }
-                            "()" -> Unit
                             else -> viewModel.append(button)
                         }
                     }
@@ -280,21 +278,33 @@ fun BasicCalculator(navController : NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdvancedCalculator(navController : NavController) {
+    val viewModel : MyViewModel = viewModel()
+    val input = viewModel.input.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxSize()
     ){
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Calculator input",
-                    fontSize = 36.sp
-                )
-            }
+        Spacer(modifier = Modifier.weight(0.5f))
+
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = input.value,
+            onValueChange = { viewModel.onInputChange(it) },
+            textStyle = TextStyle(fontSize = 48.sp, textAlign = TextAlign.End),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            )
         )
+
         val buttons = listOf(
             "sin","cos","tan","ln",
             "sqrt","x^2","x^y","log",
-            "C","()","%","D",
+            "AC","()","%","Del",
             "7","8","9","/",
             "4","5","6","*",
             "1","2","3","-",
@@ -309,7 +319,11 @@ fun AdvancedCalculator(navController : NavController) {
             items(buttons) { button ->
                 AdvancedCalculatorButton(
                     label = button,
-                    onClick = { }
+                    onClick = {
+                        when(button){
+                            button -> viewModel.append(button)
+                        }
+                    }
                 )
             }
         }
