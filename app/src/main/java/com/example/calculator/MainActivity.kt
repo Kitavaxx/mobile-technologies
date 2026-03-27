@@ -25,6 +25,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,12 +37,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 @Serializable
 object Menu
@@ -86,6 +92,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun CalculatorMenu(navController: NavController) {
     val activity = LocalContext.current as? Activity
@@ -182,19 +189,20 @@ fun evaluate(tokens: List<String>): Double {
 
 @Composable
 fun BasicCalculator(navController : NavController) {
+
+    val viewModel : MyViewModel = viewModel()
+    val input = viewModel.input.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxSize()
     ){
-        var input by remember { mutableStateOf("") }
-        var operations by remember { mutableStateOf("+-/%*") }
-
         Spacer(modifier = Modifier.weight(0.5f))
 
         TextField(
             modifier = Modifier
                 .fillMaxWidth(),
-            value = input,
-            onValueChange = { input = it },
+            value = input.value,
+            onValueChange = { viewModel.onInputChange(it) },
             textStyle = TextStyle(fontSize = 48.sp, textAlign = TextAlign.End),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
@@ -206,7 +214,7 @@ fun BasicCalculator(navController : NavController) {
         )
 
         val buttons = listOf(
-            "C","%","/","|",
+            "C","%","/","|||",
             "7","8","9","*",
             "4","5","6","-",
             "1","2","3","+",
@@ -225,28 +233,32 @@ fun BasicCalculator(navController : NavController) {
                     label = button,
                     onClick = {
                         when(button){
-                            "D" -> input = input.dropLast(1);
-                            "C" -> input = "";
+                            "D" -> viewModel.deleteLast();
+                            "C" -> viewModel.clear();
                             "." ->{
-                                tokenized = tokenizeInput(input)
+                                tokenized = tokenizeInput(input.value)
                                 token = tokenized.last()
-                                if('.' !in token) input += button;
+                                if('.' !in token) viewModel.append(button);
                             }
 
                             in listOf("/" , "+", "*", "-", "%") ->{
-                                val lastChar = input.lastOrNull()
+                                val lastChar = input.value.lastOrNull()
+                                val operations = "+-/%"
 
                                 if(lastChar != null && lastChar in operations){
-                                    input = input.dropLast(1) + button
+                                    viewModel.onInputChange(input.value.dropLast(1) + button)
                                 }else if(lastChar == null){
                                     Unit;
                                 }else{
-                                    input += button
+                                    viewModel.append(button)
                                 }
                             }
-                            "=" -> input = evaluate(tokenizeInput(input)).toString()
+                            "=" -> {
+                                val res = evaluate(tokenizeInput(input.value)).toString()
+                                viewModel.setResult(res)
+                            }
                             "+/-" -> {
-                                tokenized = tokenizeInput(input)
+                                tokenized = tokenizeInput(input.value)
                                 token = tokenized.last()
 //                                    if(token.isDigitsOnly())
 //                                        if(token - 1 == '-'){
@@ -256,7 +268,7 @@ fun BasicCalculator(navController : NavController) {
 //                                        }
                             }
                             "()" -> Unit
-                            else -> input += button
+                            else -> viewModel.append(button)
                         }
                     }
                 )
@@ -377,6 +389,31 @@ fun MenuButton(text: String = "", onClick: () -> Unit = {}){
             text = text,
             fontSize = 30.sp
         )
+    }
+}
+
+class MyViewModel : ViewModel() {
+    private val _input = MutableStateFlow("")
+    val input: StateFlow<String> = _input
+
+    fun onInputChange(newValue: String){
+        _input.value = newValue
+    }
+
+    fun clear(){
+        _input.value = ""
+    }
+
+    fun append(value: String){
+        _input.value += value
+    }
+
+    fun deleteLast(){
+        _input.value = _input.value.dropLast(1)
+    }
+
+    fun setResult(value: String){
+        _input.value = value
     }
 }
 
