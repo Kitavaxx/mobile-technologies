@@ -230,46 +230,47 @@ fun BasicCalculator(navController : NavController) {
                 CalculatorButton(
                     label = button,
                     onClick = {
+                        val tokens = tokenizeInput(input.value).toMutableList()
+                        val lastToken = tokens.lastOrNull().orEmpty()
+
                         when(button){
                             "C" -> viewModel.deleteLast();
                             "AC" -> viewModel.clear();
-                            in operatorsList + "." ->{
-                                val lastChar = input.value.lastOrNull()
-                                val tokens = tokenizeInput(input.value)
-                                val lastToken = tokens.lastOrNull().orEmpty()
-                                var dotSet = 0
-
-                                if (button == ".") {
-                                    if ('.' !in lastToken && !lastToken.isEmpty()) {
-                                        viewModel.append(button)
-                                        dotSet = 1
-                                    } else {
-                                        Toast.makeText(currentContext, errorText, toastDuration).show()
-                                    }
-
+                            "." -> {
+                                if ('.' !in lastToken && !lastToken.isEmpty()) {
+                                    viewModel.append(button)
+                                } else {
+                                    Toast.makeText(currentContext, errorText, toastDuration).show()
                                 }
+                            }
+                            in operatorsList ->{
+                                val lastChar = input.value.lastOrNull()
 
                                 if (lastChar != null && lastChar in operations) {
-                                    if(dotSet == 1) viewModel.onInputChange(input.value.dropLast(1) + button)
+                                    viewModel.onInputChange(input.value.dropLast(1) + button)
                                 } else if (lastChar != null) {
-                                    if(dotSet == 0) viewModel.append(button)
+                                    viewModel.append(button)
                                 }
                             }
                             "=" -> {
-                                val evalResult = evaluate(tokenizeInput(input.value)).toString()
+                                if(lastToken in operations){
+                                    Toast.makeText(currentContext, errorText, toastDuration).show()
+                                    return@CalculatorButton
+                                }
+
+                                val evalResult = evaluate(tokens).toString()
                                 viewModel.setResult(evalResult)
                             }
                             "+/-" -> {
-                                val tokenized = tokenizeInput(input.value).toMutableList()
-                                token = tokenized.last()
+                                token = tokens.last()
                                 if(token !in operations){
-                                    val sign = tokenized.getOrNull(tokenized.size - 2)
+                                    val sign = tokens.getOrNull(tokens.size - 2)
                                     if(sign == "-"){
-                                        tokenized[tokenized.size - 2] = "+"
+                                        tokens[tokens.size - 2] = "+"
                                     }else if(sign == "+"){
-                                        tokenized[tokenized.size - 2] = "-"
+                                        tokens[tokens.size - 2] = "-"
                                     }
-                                    viewModel.onInputChange(tokenized.joinToString(""))
+                                    viewModel.onInputChange(tokens.joinToString(""))
                                 }
                             }
                             else -> viewModel.append(button)
