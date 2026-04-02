@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calculator.buttons.CalculatorButton
-import com.example.calculator.MyViewModel
+import com.example.calculator.viewModels.MyViewModel
 import com.example.calculator.utils.analyzeInput
 
 @Composable

@@ -14,18 +14,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calculator.buttons.AdvancedCalculatorButton
-import com.example.calculator.MyViewModel
+import com.example.calculator.utils.analyzeInput
+import com.example.calculator.viewModels.MyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdvancedCalculator() {
     val viewModel : MyViewModel = viewModel()
     val input = viewModel.input.collectAsState()
+    val currentContext = LocalContext.current
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -50,7 +53,7 @@ fun AdvancedCalculator() {
         val buttons = listOf(
             "sin","cos","tan","ln",
             "sqrt","x^2","x^y","log",
-            "AC","()","%","Del",
+            "AC","C","()","%",
             "7","8","9","/",
             "4","5","6","*",
             "1","2","3","-",
@@ -65,10 +68,14 @@ fun AdvancedCalculator() {
             items(buttons) { button ->
                 AdvancedCalculatorButton(
                     label = button,
+
                     onClick = {
-                        when(button){
-                            button -> viewModel.append(button)
-                        }
+                        analyzeInput(
+                            button = button,
+                            input = input.value,
+                            viewModel = viewModel,
+                            context = currentContext
+                        )
                     }
                 )
             }

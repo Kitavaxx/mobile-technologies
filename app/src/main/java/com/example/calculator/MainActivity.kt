@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -16,8 +15,6 @@ import com.example.calculator.pages.AboutPage
 import com.example.calculator.pages.AdvancedCalculator
 import com.example.calculator.pages.BasicCalculator
 import com.example.calculator.pages.CalculatorMenu
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -61,31 +58,6 @@ class MainActivity : ComponentActivity() {
                 }
             )
         }
-    }
-}
-
-class MyViewModel : ViewModel() {
-    private val _input = MutableStateFlow("")
-    val input: StateFlow<String> = _input
-
-    fun onInputChange(newValue: String){
-        _input.value = newValue
-    }
-
-    fun clear(){
-        _input.value = ""
-    }
-
-    fun append(value: String){
-        _input.value += value
-    }
-
-    fun deleteLast(){
-        _input.value = _input.value.dropLast(1)
-    }
-
-    fun setResult(value: String){
-        _input.value = value
     }
 }
 
