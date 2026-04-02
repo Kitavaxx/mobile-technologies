@@ -32,7 +32,7 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
         in operatorsList ->{
             if (!lastToken.isEmpty() && lastToken in operatorsList) {
                 viewModel.onInputChange(input.dropLast(1) + button)
-            } else if (!lastToken.isEmpty()) {
+            } else if (!lastToken.isEmpty() || ((lastToken.isEmpty() && button == "-"))) {
                 viewModel.append(button)
             }
         }
@@ -128,14 +128,15 @@ fun tokenizeInput(expr: String): List<String> {
     var numberBuffer = ""
 
     for(char in expr){
-        if(char.isDigit() || char == '.'){
-            numberBuffer += char
-        }else if(char in "+-*/%"){
-            if(numberBuffer.isNotEmpty()){
-                tokens.add(numberBuffer)
-                numberBuffer = ""
+        when{
+            char.isDigit() || char == '.' || (char == '-' && numberBuffer.isEmpty())-> numberBuffer += char
+            char in "+-*/%" -> {
+                if(numberBuffer.isNotEmpty()){
+                    tokens.add(numberBuffer)
+                    numberBuffer = ""
+                }
+                tokens.add(char.toString())
             }
-            tokens.add(char.toString())
         }
     }
 
