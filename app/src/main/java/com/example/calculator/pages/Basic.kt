@@ -1,0 +1,78 @@
+package com.example.calculator.pages
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.calculator.buttons.CalculatorButton
+import com.example.calculator.MyViewModel
+import com.example.calculator.utils.analyzeInput
+
+@Composable
+fun BasicCalculator() {
+    val viewModel : MyViewModel = viewModel()
+    val input = viewModel.input.collectAsState()
+    val currentContext = LocalContext.current
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ){
+        Spacer(modifier = Modifier.weight(0.5f))
+
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = input.value,
+            onValueChange = { viewModel.onInputChange(it) },
+            textStyle = TextStyle(fontSize = 48.sp, textAlign = TextAlign.End),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            )
+        )
+
+        val buttons = listOf(
+            "AC","C","%","/",
+            "7","8","9","*",
+            "4","5","6","-",
+            "1","2","3","+",
+            "+/-","0",".","="
+        )
+        Spacer(modifier = Modifier.weight(1f))
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+        ) {
+            items(buttons) { button ->
+                CalculatorButton(
+                    label = button,
+                    onClick = {
+                        analyzeInput(
+                            button = button,
+                            input = input.value,
+                            viewModel = viewModel,
+                            context = currentContext
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
