@@ -2,7 +2,6 @@ package com.example.calculator.utils
 
 import android.content.Context
 import android.widget.Toast
-import androidx.core.text.isDigitsOnly
 import com.example.calculator.viewModels.MyViewModel
 import kotlin.math.*
 
@@ -17,7 +16,6 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
         "log" to { x -> log10(x) },
         )
     val advancedTrigonometricOperators = listOf("sqrt", "sin", "cos", "tan")
-
     val tokens = tokenizeInput(input).toMutableList()
     var lastToken = tokens.lastOrNull().orEmpty()
 
@@ -59,7 +57,7 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
             }
         }
         in advancedOperatorsList -> {
-            if(lastToken.isDigitsOnly() && !lastToken.isEmpty()){
+            if(lastToken.toDoubleOrNull() != null && !input.isEmpty()){
                 var buffNumber = lastToken.toDouble()
 
                 if(button in advancedTrigonometricOperators){
@@ -78,6 +76,48 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
             }else{
                 Toast.makeText(context, "Invalid operation", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        "()" -> {
+            val openCount = input.count { it == '(' }
+            val closeCount = input.count { it == ')' }
+
+            when {
+                input.isEmpty() -> {
+                    viewModel.append("(")
+                }
+                lastToken == "(" -> {
+                    viewModel.append("(")
+                }
+                lastToken in operatorsList -> {
+                    viewModel.append("(")
+                }
+                lastToken.toDoubleOrNull() != null || lastToken == ")" -> {
+                    if (openCount > closeCount) {
+                        viewModel.append(")")
+                    } else {
+                        viewModel.append("*(")
+                    }
+                }
+                openCount > closeCount -> {
+                    viewModel.append(")")
+                }
+                else -> {
+                    viewModel.append("(")
+                }
+            }
+        }
+        "x^2" -> {
+            if(lastToken.toDoubleOrNull() != null && !input.isEmpty()){
+                lastToken = (lastToken.toDouble() * lastToken.toDouble()).toString().take(12)
+                viewModel.deleteLast()
+                viewModel.append(lastToken)
+            }else{
+                Toast.makeText(context, "Invalid operation", Toast.LENGTH_SHORT).show()
+            }
+        }
+        "x^y" -> {
+            viewModel.append("^(")
         }
         else -> viewModel.append(button)
     }
@@ -118,6 +158,7 @@ fun evaluate(tokens: List<String>): Double {
             "*" -> a * b
             "/" -> a / b
             "%" -> a % b
+            "^" -> a.pow(b)
             else -> 0.0
         }
         stack.add(result)
@@ -125,7 +166,7 @@ fun evaluate(tokens: List<String>): Double {
 
     val precedence = mapOf(
         "+" to 1, "-" to 1,
-        "*" to 2, "/" to 2, "%" to 2
+        "*" to 2, "/" to 2, "%" to 2, "^" to 2
     )
 
     for (token in tokens) {
