@@ -42,18 +42,17 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
                 return
             }
 
-            val evalResult = evaluate(tokens).toString()
-            viewModel.setResult(evalResult)
+            try{
+                val evalResult = evaluate(tokens).toString()
+                viewModel.setResult(evalResult)
+            }catch (e: Exception){
+                Toast.makeText(context, e.message ?: "Division by zero!", Toast.LENGTH_SHORT).show()
+            }
         }
-        "+/-" -> { // TODO: fix bug when user cannot change - on start of input first token
-            if(lastToken !in operatorsList){
-                val sign = tokens.getOrNull(tokens.size - 2)
-                if(sign == "-"){
-                    tokens[tokens.size - 2] = "+"
-                }else if(sign == "+"){
-                    tokens[tokens.size - 2] = "-"
-                }
-                viewModel.onInputChange(tokens.joinToString(""))
+        "+/-" -> {
+            if(lastToken.toDoubleOrNull() != null){
+                val newValue = (-lastToken.toDouble()).toString()
+                viewModel.onInputChange((tokens.dropLast(1) + newValue).joinToString(""))
             }
         }
         in advancedOperatorsList -> {
@@ -128,8 +127,8 @@ fun tokenizeInput(expr: String): List<String> {
 
     for(char in expr){
         when{
-            char.isDigit() || char == '.' || (char == '-' && numberBuffer.isEmpty())-> numberBuffer += char
-            char in "+-*/%" -> {
+            char.isDigit() || char == '.' || (char == '-' && numberBuffer.isEmpty()) -> numberBuffer += char
+            char in "+-*/%^" -> {
                 if(numberBuffer.isNotEmpty()){
                     tokens.add(numberBuffer)
                     numberBuffer = ""
@@ -156,7 +155,10 @@ fun evaluate(tokens: List<String>): Double {
             "+" -> a + b
             "-" -> a - b
             "*" -> a * b
-            "/" -> a / b
+            "/" -> {
+                if(b == 0.0) throw ArithmeticException("Division by zero")
+                a / b
+            }
             "%" -> a % b
             "^" -> a.pow(b)
             else -> 0.0
@@ -171,13 +173,21 @@ fun evaluate(tokens: List<String>): Double {
     )
 
     for (token in tokens) {
-        if (token.toDoubleOrNull() != null) {
-            stack.add(token.toDouble())
-        } else if (token in precedence) {
-            while (ops.isNotEmpty() && precedence[ops.last()]!! >= precedence[token]!!) {
-                applyOp()
+        when {
+            token.toDoubleOrNull() != null -> stack.add(token.toDouble())
+            token in precedence -> {
+                while (ops.isNotEmpty() && ops.last() != "(" && precedence[ops.last()]!! >= precedence[token]!!) {
+                    applyOp()
+                }
+                ops.add(token)
             }
-            ops.add(token)
+            token == "(" -> ops.add(token)
+            token == ")" -> {
+                while (ops.isNotEmpty() && ops.last() != "(") {
+                    applyOp()
+                }
+                ops.removeLast() // remove "("
+            }
         }
     }
 
