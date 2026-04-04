@@ -9,6 +9,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -24,7 +25,7 @@ fun AdvancedCalculatorButton(label: String, onClick: (String) -> Unit = {}) {
     ){
         Text(
             text=  label,
-            fontSize = 28.sp
+            fontSize = 28.sp,
         )
     }
 }
@@ -57,7 +58,8 @@ fun MenuButton(text: String = "", onClick: () -> Unit = {}){
     ){
         Text(
             text = text,
-            fontSize = 30.sp
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
         )
     }
 }

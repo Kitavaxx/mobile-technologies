@@ -45,7 +45,7 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
             val evalResult = evaluate(tokens).toString()
             viewModel.setResult(evalResult)
         }
-        "+/-" -> {
+        "+/-" -> { // TODO: fix bug when user cannot change - on start of input first token
             if(lastToken !in operatorsList){
                 val sign = tokens.getOrNull(tokens.size - 2)
                 if(sign == "-"){
@@ -67,9 +67,8 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
                 val evalFunc = advancedOperatorsList[button]
 
                 if (evalFunc != null) {
-                    lastToken = evalFunc(buffNumber).toString().take(12)
-                    viewModel.deleteLast()
-                    viewModel.append(lastToken)
+                    lastToken = evalFunc(buffNumber).toString()
+                    viewModel.onInputChange((tokens.dropLast(1) + lastToken).joinToString (""))
                 }else{
                     Toast.makeText(context, "Unknown operator", Toast.LENGTH_SHORT).show()
                 }
@@ -109,7 +108,7 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
         }
         "x^2" -> {
             if(lastToken.toDoubleOrNull() != null && !input.isEmpty()){
-                lastToken = (lastToken.toDouble() * lastToken.toDouble()).toString().take(12)
+                lastToken = (lastToken.toDouble() * lastToken.toDouble()).toString()
                 viewModel.deleteLast()
                 viewModel.append(lastToken)
             }else{
@@ -167,7 +166,8 @@ fun evaluate(tokens: List<String>): Double {
 
     val precedence = mapOf(
         "+" to 1, "-" to 1,
-        "*" to 2, "/" to 2, "%" to 2, "^" to 2
+        "*" to 2, "/" to 2, "%" to 2,
+        "^" to 3
     )
 
     for (token in tokens) {
