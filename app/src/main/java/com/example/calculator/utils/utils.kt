@@ -20,7 +20,17 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
     var lastToken = tokens.lastOrNull().orEmpty()
 
     when(button){
-        "C" -> viewModel.deleteLast()
+        "C" -> {
+            val currentTime = System.currentTimeMillis()
+
+            if(currentTime - viewModel.lastClickTime < 300){
+                viewModel.clear()
+            }else{
+                viewModel.deleteLast()
+            }
+
+            viewModel.lastClickTime = currentTime
+        }
         "AC" -> viewModel.clear()
         "." -> {
             if ('.' !in lastToken && !lastToken.isEmpty() && lastToken !in operatorsList) {

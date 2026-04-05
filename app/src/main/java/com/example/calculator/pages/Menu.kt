@@ -35,7 +35,7 @@ fun CalculatorMenu(navController: NavController) {
             text = "Calculator Menu",
             fontSize = 42.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 40.dp)
+            modifier = Modifier.padding(bottom = 20.dp)
         )
 
         MenuButton("Basic"){

@@ -103,12 +103,12 @@ fun MenuButton(text: String = "", onClick: () -> Unit = {}){
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp)
-            .height(70.dp)
+            .padding(2.dp)
+            .height(50.dp)
     ){
         Text(
             text = text,
-            fontSize = 32.sp,
+            fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
         )
     }

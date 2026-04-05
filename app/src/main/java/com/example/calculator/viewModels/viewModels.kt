@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 class MyViewModel : ViewModel() {
     private val _input = MutableStateFlow("")
     val input: StateFlow<String> = _input
+    var lastClickTime = 0L
 
     fun onInputChange(newValue: String){
         _input.value = newValue
