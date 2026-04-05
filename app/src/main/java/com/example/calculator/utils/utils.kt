@@ -186,7 +186,14 @@ fun evaluate(tokens: List<String>): Double {
         when {
             token.toDoubleOrNull() != null -> stack.add(token.toDouble())
             token in precedence -> {
-                while (ops.isNotEmpty() && ops.last() != "(" && precedence[ops.last()]!! >= precedence[token]!!) {
+                while (
+                    ops.isNotEmpty() &&
+                    ops.last() in precedence &&
+                    (
+                            precedence[ops.last()]!! > precedence[token]!! ||
+                            (precedence[ops.last()] == precedence[token] && token != "^")
+                            )
+                ) {
                     applyOp()
                 }
                 ops.add(token)
@@ -199,6 +206,7 @@ fun evaluate(tokens: List<String>): Double {
                 ops.removeLast() // remove "("
             }
         }
+
     }
 
     while (ops.isNotEmpty()) applyOp()
