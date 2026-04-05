@@ -11,9 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.calculator.pages.AboutPage
-import com.example.calculator.pages.AdvancedCalculator
-import com.example.calculator.pages.BasicCalculator
+import com.example.calculator.pages.About.AboutPage
+import com.example.calculator.pages.Advanced.AdvancedCalculator
+import com.example.calculator.pages.Basic.BasicCalculator
 import com.example.calculator.pages.CalculatorMenu
 import kotlinx.serialization.Serializable
 

@@ -1,4 +1,4 @@
-package com.example.calculator.pages
+package com.example.calculator.pages.About
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

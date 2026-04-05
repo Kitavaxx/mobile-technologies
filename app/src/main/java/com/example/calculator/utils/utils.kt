@@ -15,7 +15,7 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
         "ln" to { x -> ln(x) },
         "log" to { x -> log10(x) },
         )
-    val advancedTrigonometricOperators = listOf("sqrt", "sin", "cos", "tan")
+    val advancedTrigonometricOperators = listOf("sin", "cos", "tan")
     val tokens = tokenizeInput(input).toMutableList()
     var lastToken = tokens.lastOrNull().orEmpty()
 
