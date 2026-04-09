@@ -53,10 +53,13 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
             }
 
             try{
+                val fixedInput = autoCloseParentheses(input)
+                val tokens = tokenizeInput(fixedInput)
                 val evalResult = evaluate(tokens).toString()
+
                 viewModel.setResult(evalResult)
             }catch (e: Exception){
-                Toast.makeText(context, e.message ?: "Division by zero!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, e.message ?: "Invalid Operation", Toast.LENGTH_SHORT).show()
             }
         }
         "+/-" -> {
@@ -118,14 +121,21 @@ fun analyzeInput(button: String, input: String, viewModel: MyViewModel, context:
         "x^2" -> {
             if(lastToken.toDoubleOrNull() != null && !input.isEmpty()){
                 lastToken = (lastToken.toDouble() * lastToken.toDouble()).toString()
-                viewModel.deleteLast()
-                viewModel.append(lastToken)
+                viewModel.onInputChange((tokens.dropLast(1) + lastToken).joinToString(""))
             }else{
                 Toast.makeText(context, "Invalid operation", Toast.LENGTH_SHORT).show()
             }
         }
         "x^y" -> {
-            viewModel.append("^(")
+            if(input.isEmpty()){
+                Toast.makeText(context, "Invalid operation", Toast.LENGTH_SHORT).show()
+            }else{
+                if (!lastToken.isEmpty() && lastToken in operatorsList) {
+                    viewModel.onInputChange(input.dropLast(1) + "^(")
+                }else{
+                    viewModel.append("^(")
+                }
+            }
         }
         else -> viewModel.append(button)
     }
@@ -138,7 +148,7 @@ fun tokenizeInput(expr: String): List<String> {
     for(char in expr){
         when{
             char.isDigit() || char == '.' || (char == '-' && numberBuffer.isEmpty()) -> numberBuffer += char
-            char in "+-*/%^" -> {
+            char in "+-*/%^()"-> {
                 if(numberBuffer.isNotEmpty()){
                     tokens.add(numberBuffer)
                     numberBuffer = ""
@@ -212,4 +222,16 @@ fun evaluate(tokens: List<String>): Double {
     while (ops.isNotEmpty()) applyOp()
 
     return stack.first()
+}
+
+fun autoCloseParentheses(input: String): String {
+    val openCount = input.count { it == '(' }
+    val closeCount = input.count { it == ')' }
+    val missing = openCount - closeCount
+
+    return if (missing > 0) {
+        input + ")".repeat(missing)
+    } else {
+        input
+    }
 }
