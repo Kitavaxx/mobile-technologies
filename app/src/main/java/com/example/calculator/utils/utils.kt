@@ -177,6 +177,7 @@ fun evaluate(tokens: List<String>): Double {
             "*" -> a * b
             "/" -> {
                 if(b == 0.0) throw ArithmeticException("Division by zero")
+
                 a / b
             }
             "%" -> a % b
@@ -189,6 +190,7 @@ fun evaluate(tokens: List<String>): Double {
     val precedence = mapOf(
         "+" to 1, "-" to 1,
         "*" to 2, "/" to 2, "%" to 2,
+
         "^" to 3
     )
 

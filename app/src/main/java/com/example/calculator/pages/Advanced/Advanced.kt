@@ -131,7 +131,7 @@ fun AdvancedCalculatorLandscapeUI() {
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp)
+                .height(65.dp)
                 .verticalScroll(scrollState),
             value = input.value,
             onValueChange = {

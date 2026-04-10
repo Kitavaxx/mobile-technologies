@@ -44,7 +44,7 @@ fun AdvancedCalculatorButtonUI(label: String, onClick: (String) -> Unit = {}) {
     ){
         Text(
             text=  label,
-            fontSize = 28.sp,
+            fontSize = 18.sp,
         )
     }
 }
@@ -56,11 +56,11 @@ fun AdvancedCalculatorButtonLandscapeUI(label: String, onClick: (String) -> Unit
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp)
-            .height(45.dp)
+            .height(38.dp)
     ){
         Text(
             text=  label,
-            fontSize = 28.sp,
+            fontSize = 18.sp,
         )
     }
 }
@@ -76,7 +76,7 @@ fun CalculatorButtonUI(label: String, onClick: (String) -> Unit = {}) {
     ){
         Text(
             text=  label,
-            fontSize = 28.sp
+            fontSize = 26.sp
         )
     }
 }
@@ -88,11 +88,11 @@ fun CalculatorButtonLandscapeUI(label: String, onClick: (String) -> Unit = {}) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp)
-            .height(50.dp)
+            .height(40.dp)
     ){
         Text(
             text=  label,
-            fontSize = 28.sp
+            fontSize = 18.sp
         )
     }
 }
